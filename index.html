@@ -16,77 +16,113 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.025) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0}
 .scanline{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.5),transparent);animation:scan 5s linear infinite;pointer-events:none;z-index:999}
 @keyframes scan{0%{top:-2px}100%{top:100vh}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-.wrap{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:14px 18px}
-header{display:flex;align-items:center;justify-content:space-between;padding:18px 0 14px;border-bottom:1px solid var(--border);margin-bottom:22px;flex-wrap:wrap;gap:12px}
-.logo{display:flex;align-items:center;gap:14px}
-.logo-icon{width:46px;height:46px;border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 14px rgba(0,229,255,0.25)}
-.logo-icon::before{content:'';position:absolute;width:32px;height:13px;border:2px solid var(--accent);border-radius:20px;opacity:0.55}
-.logo-icon::after{content:'';position:absolute;width:7px;height:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 7px var(--accent)}
-.logo-text h1{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;color:var(--accent);letter-spacing:2px}
-.logo-text p{font-size:10px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-top:2px}
-.status-bar{display:flex;align-items:center;gap:9px;font-family:'Share Tech Mono',monospace;font-size:12px}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--dim);transition:all 0.3s;flex-shrink:0}
-.status-dot.connected{background:var(--safe);box-shadow:0 0 8px var(--safe)}
-.status-dot.scanning{background:var(--warn);box-shadow:0 0 8px var(--warn);animation:pulse 0.8s infinite}
-.status-dot.alerting{background:var(--danger);box-shadow:0 0 10px var(--danger);animation:pulse 0.3s infinite}
-.grid{display:grid;grid-template-columns:1fr 350px;gap:18px}
-@media(max-width:720px){.grid{grid-template-columns:1fr}}
-.radar-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px;display:flex;flex-direction:column;align-items:center;position:relative}
-.panel-label{position:absolute;top:13px;left:18px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:3px;text-transform:uppercase}
-.radar-svg{width:270px;height:270px;margin:28px auto 14px;display:block}
-@keyframes rotateSweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.sweep-g{transform-origin:135px 135px;animation:rotateSweep 3s linear infinite}
-.distance-big{font-family:'Orbitron',monospace;font-size:54px;font-weight:900;color:var(--safe);text-align:center;line-height:1;transition:color 0.25s}
-.distance-big.warn{color:var(--warn)}
-.distance-big.danger{color:var(--danger)}
-.distance-unit{font-size:13px;color:var(--dim);font-family:'Share Tech Mono',monospace;letter-spacing:3px;text-align:center;margin-top:5px}
-.zone-label{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;text-align:center;margin-top:11px;padding:6px 18px;border-radius:4px;border:1px solid var(--safe);color:var(--safe);transition:all 0.25s;text-transform:uppercase}
-.zone-label.warn{border-color:var(--warn);color:var(--warn)}
-.zone-label.danger{border-color:var(--danger);color:var(--danger);animation:pulse 0.4s infinite}
-.right-col{display:flex;flex-direction:column;gap:14px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
-.card-title{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:13px}
-.banner{border-radius:8px;padding:11px 14px;margin-bottom:12px;font-family:'Share Tech Mono',monospace;font-size:11px;line-height:1.9}
-.banner-warn{background:rgba(255,107,0,0.1);border:1px solid rgba(255,107,0,0.35);color:#ffb070}
-.banner-warn b{color:var(--accent2);font-size:12px;display:block;margin-bottom:3px}
-.banner-ok{background:rgba(0,255,136,0.07);border:1px solid rgba(0,255,136,0.3);color:#70ffb8}
-.banner-ok b{color:var(--safe);font-size:12px;display:block;margin-bottom:3px}
-.btn{width:100%;padding:11px 14px;border-radius:6px;cursor:pointer;font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;border:1px solid;transition:all 0.2s;margin-bottom:7px;display:block}
-.btn:disabled{opacity:0.3;cursor:not-allowed}
-.btn-serial{background:rgba(0,229,255,0.07);border-color:var(--accent);color:var(--accent)}
-.btn-serial:hover:not(:disabled){background:rgba(0,229,255,0.16)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.25}}
+.wrap{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:14px 16px}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 14px;border-bottom:1px solid var(--border);margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.logo{display:flex;align-items:center;gap:13px}
+.logo-icon{width:44px;height:44px;border:2px solid var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 0 14px rgba(0,229,255,0.25)}
+.logo-icon::before{content:'';position:absolute;width:30px;height:12px;border:2px solid var(--accent);border-radius:20px;opacity:0.55}
+.logo-icon::after{content:'';position:absolute;width:6px;height:6px;background:var(--accent);border-radius:50%;box-shadow:0 0 7px var(--accent)}
+.logo-text h1{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.logo-text p{font-size:10px;color:var(--dim);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.status-bar{display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:11px}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--dim);flex-shrink:0;transition:all 0.3s}
+.sdot.on{background:var(--safe);box-shadow:0 0 8px var(--safe)}
+.sdot.scan{background:var(--warn);box-shadow:0 0 8px var(--warn);animation:pulse 0.7s infinite}
+.sdot.alert{background:var(--danger);box-shadow:0 0 10px var(--danger);animation:pulse 0.25s infinite}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:1fr 340px;gap:16px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+
+/* RADAR */
+.radar-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;align-items:center;position:relative}
+.plbl{position:absolute;top:12px;left:16px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:3px}
+.radar-svg{width:260px;height:260px;margin:26px auto 12px;display:block}
+@keyframes rotateSweep{to{transform:rotate(360deg)}}
+.sweep-g{transform-origin:130px 130px;animation:rotateSweep 3s linear infinite}
+.dist-num{font-family:'Orbitron',monospace;font-size:50px;font-weight:900;color:var(--safe);text-align:center;line-height:1;transition:color 0.2s}
+.dist-num.w{color:var(--warn)}.dist-num.d{color:var(--danger)}
+.dist-unit{font-size:12px;color:var(--dim);font-family:'Share Tech Mono',monospace;letter-spacing:3px;text-align:center;margin-top:4px}
+.zlbl{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;text-align:center;margin-top:10px;padding:5px 16px;border-radius:4px;border:1px solid var(--safe);color:var(--safe);transition:all 0.2s;text-transform:uppercase}
+.zlbl.w{border-color:var(--warn);color:var(--warn)}
+.zlbl.d{border-color:var(--danger);color:var(--danger);animation:pulse 0.4s infinite}
+
+/* RIGHT */
+.right-col{display:flex;flex-direction:column;gap:13px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px}
+.ctitle{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;margin-bottom:12px}
+
+/* STEP CONNECT BOX */
+.step-box{border-radius:8px;padding:12px 14px;margin-bottom:11px;font-family:'Share Tech Mono',monospace;font-size:11px;line-height:1.9;border:1px solid}
+.step-box.info{background:rgba(0,229,255,0.05);border-color:rgba(0,229,255,0.2);color:#7ad8f0}
+.step-box.info b{color:var(--accent);display:block;margin-bottom:3px;font-size:12px}
+.step-box.ok{background:rgba(0,255,136,0.06);border-color:rgba(0,255,136,0.25);color:#70ffb8}
+.step-box.ok b{color:var(--safe);display:block;margin-bottom:3px;font-size:12px}
+.step-box.warn{background:rgba(255,204,0,0.06);border-color:rgba(255,204,0,0.25);color:#ffe080}
+.step-box.warn b{color:var(--warn);display:block;margin-bottom:3px;font-size:12px}
+
+/* TABS */
+.tabs{display:flex;gap:5px;margin-bottom:12px}
+.tab{flex:1;padding:8px 4px;border-radius:5px;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;text-align:center;border:1px solid var(--border);color:var(--dim);transition:all 0.2s;background:transparent}
+.tab.active{border-color:var(--accent);color:var(--accent);background:rgba(0,229,255,0.06)}
+.tab-pane{display:none}.tab-pane.active{display:block}
+
+/* BUTTONS */
+.btn{width:100%;padding:10px 12px;border-radius:6px;cursor:pointer;font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;border:1px solid;transition:all 0.2s;margin-bottom:6px}
+.btn:last-child{margin-bottom:0}
+.btn:disabled{opacity:0.28;cursor:not-allowed}
+.btn-bt{background:rgba(0,229,255,0.07);border-color:var(--accent);color:var(--accent)}
+.btn-bt:hover:not(:disabled){background:rgba(0,229,255,0.15)}
+.btn-ser{background:rgba(0,255,136,0.06);border-color:var(--safe);color:var(--safe)}
+.btn-ser:hover:not(:disabled){background:rgba(0,255,136,0.14)}
 .btn-demo{background:rgba(255,107,0,0.07);border-color:var(--accent2);color:var(--accent2)}
-.btn-demo:hover{background:rgba(255,107,0,0.16)}
-.btn-mute{background:rgba(255,204,0,0.06);border-color:var(--warn);color:var(--warn);margin-bottom:0}
-.btn-mute:hover{background:rgba(255,204,0,0.14)}
-.manual-row{display:flex;gap:7px;margin-top:10px}
-.manual-in{flex:1;background:rgba(0,229,255,0.04);border:1px solid var(--dim);border-radius:5px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;padding:8px 10px;outline:none;transition:border-color 0.2s}
-.manual-in:focus{border-color:var(--accent)}
-.btn-send{padding:8px 14px;border-radius:5px;cursor:pointer;font-family:'Orbitron',monospace;font-size:9px;border:1px solid var(--accent);color:var(--accent);background:rgba(0,229,255,0.07);transition:all 0.2s;white-space:nowrap;letter-spacing:1px}
-.btn-send:hover{background:rgba(0,229,255,0.18)}
-.info-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
-.info-row:last-child{border-bottom:none}
-.info-label{color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px}
-.info-val{color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px}
-.info-val.live{color:var(--accent)}
-.beep-viz{display:flex;align-items:flex-end;gap:4px;height:44px;margin-top:10px}
-.beep-bar{flex:1;border-radius:2px 2px 0 0;min-height:4px;background:var(--dim);transition:background 0.08s}
-.beep-bar.active{background:var(--accent)}
-.beep-bar.bw.active{background:var(--warn)}
-.beep-bar.bd.active{background:var(--danger)}
-.zone-table{width:100%;border-collapse:collapse;font-size:11px}
-.zone-table td{padding:6px 7px;border-bottom:1px solid var(--border)}
-.zone-table tr:last-child td{border-bottom:none}
+.btn-demo:hover{background:rgba(255,107,0,0.14)}
+.btn-mute{background:rgba(255,204,0,0.05);border-color:var(--warn);color:var(--warn)}
+.btn-mute:hover{background:rgba(255,204,0,0.12)}
+
+.sep{height:1px;background:var(--border);margin:10px 0}
+
+/* MANUAL */
+.mrow{display:flex;gap:6px;margin-top:8px}
+.min{flex:1;background:rgba(0,229,255,0.04);border:1px solid var(--dim);border-radius:5px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;padding:8px 10px;outline:none;transition:border-color 0.2s}
+.min:focus{border-color:var(--accent)}
+.msend{padding:8px 12px;border-radius:5px;cursor:pointer;font-family:'Orbitron',monospace;font-size:9px;border:1px solid var(--accent);color:var(--accent);background:rgba(0,229,255,0.07);transition:all 0.2s;white-space:nowrap}
+.msend:hover{background:rgba(0,229,255,0.17)}
+
+/* INFO */
+.irow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+.irow:last-child{border-bottom:none}
+.ilbl{color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px}
+.ival{color:var(--text);font-family:'Share Tech Mono',monospace;font-size:11px}
+.ival.live{color:var(--accent)}
+
+/* BEEP BARS */
+.bviz{display:flex;align-items:flex-end;gap:4px;height:42px;margin-top:9px}
+.bbar{flex:1;border-radius:2px 2px 0 0;min-height:4px;background:var(--dim);transition:background 0.07s}
+.bbar.on{background:var(--accent)}
+.bbar.bw.on{background:var(--warn)}
+.bbar.bd.on{background:var(--danger)}
+
+/* ZONES */
+.ztbl{width:100%;border-collapse:collapse;font-size:11px}
+.ztbl td{padding:6px 6px;border-bottom:1px solid var(--border)}
+.ztbl tr:last-child td{border-bottom:none}
 .zdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle}
-.log-box{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);height:80px;overflow-y:auto;line-height:1.9;padding:1px 0}
-.log-box div{border-bottom:1px solid rgba(12,32,48,0.4)}
+
+/* LOG */
+.lbox{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);height:78px;overflow-y:auto;line-height:1.85;padding:1px 0}
+.lbox div{border-bottom:1px solid rgba(12,32,48,0.4)}
 .ld{color:var(--danger)}.lw{color:var(--warn)}.ls{color:var(--safe)}.li{color:var(--accent)}
-.log-box::-webkit-scrollbar{width:3px}
-.log-box::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
-.bottom-bar{margin-top:18px;padding:12px 18px;background:var(--panel);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
-.credit{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:1px}
-.credit span{color:var(--accent)}
+.lbox::-webkit-scrollbar{width:3px}
+.lbox::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
+
+/* BOTTOM */
+.bbar-foot{margin-top:16px;padding:11px 16px;background:var(--panel);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.cred{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:1px}
+.cred span{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -98,11 +134,11 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
       <div class="logo-icon"></div>
       <div class="logo-text">
         <h1>SMART GLASSES</h1>
-        <p>Assistive Navigation System v2.0</p>
+        <p>Assistive Navigation System v3.0</p>
       </div>
     </div>
     <div class="status-bar">
-      <div class="status-dot" id="sDot"></div>
+      <div class="sdot" id="sDot"></div>
       <span id="sTxt" style="color:var(--dim)">DISCONNECTED</span>
     </div>
   </header>
@@ -111,89 +147,128 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
     <!-- RADAR -->
     <div class="radar-panel">
-      <div class="panel-label">Obstacle Detection Radar</div>
-      <svg class="radar-svg" viewBox="0 0 270 270" xmlns="http://www.w3.org/2000/svg">
+      <div class="plbl">Obstacle Detection Radar</div>
+      <svg class="radar-svg" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <radialGradient id="rg" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.07"/>
             <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
           </radialGradient>
-          <clipPath id="rc"><circle cx="135" cy="135" r="128"/></clipPath>
+          <clipPath id="rc"><circle cx="130" cy="130" r="122"/></clipPath>
           <filter id="gl"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
-        <circle cx="135" cy="135" r="128" fill="url(#rg)"/>
-        <circle cx="135" cy="135" r="32"  fill="none" stroke="#0c2030" stroke-width="1"/>
-        <circle cx="135" cy="135" r="64"  fill="none" stroke="#0c2030" stroke-width="1"/>
-        <circle cx="135" cy="135" r="96"  fill="none" stroke="#0c2030" stroke-width="1"/>
-        <circle cx="135" cy="135" r="128" fill="none" stroke="#0c2030" stroke-width="1"/>
-        <line x1="135" y1="7"   x2="135" y2="263" stroke="#0c2030" stroke-width="0.5"/>
-        <line x1="7"   y1="135" x2="263" y2="135" stroke="#0c2030" stroke-width="0.5"/>
-        <line x1="45"  y1="45"  x2="225" y2="225" stroke="#0c2030" stroke-width="0.5"/>
-        <line x1="225" y1="45"  x2="45"  y2="225" stroke="#0c2030" stroke-width="0.5"/>
-        <text x="135" y="21"  text-anchor="middle" fill="#1a3a50" font-size="8" font-family="Share Tech Mono,monospace">50cm</text>
-        <text x="135" y="53"  text-anchor="middle" fill="#1a3a50" font-size="8" font-family="Share Tech Mono,monospace">150cm</text>
-        <text x="135" y="85"  text-anchor="middle" fill="#1a3a50" font-size="8" font-family="Share Tech Mono,monospace">250cm</text>
-        <text x="135" y="117" text-anchor="middle" fill="#1a3a50" font-size="8" font-family="Share Tech Mono,monospace">400cm</text>
+        <circle cx="130" cy="130" r="122" fill="url(#rg)"/>
+        <circle cx="130" cy="130" r="30"  fill="none" stroke="#0c2030" stroke-width="1"/>
+        <circle cx="130" cy="130" r="61"  fill="none" stroke="#0c2030" stroke-width="1"/>
+        <circle cx="130" cy="130" r="92"  fill="none" stroke="#0c2030" stroke-width="1"/>
+        <circle cx="130" cy="130" r="122" fill="none" stroke="#0c2030" stroke-width="1"/>
+        <line x1="130" y1="8"   x2="130" y2="252" stroke="#0c2030" stroke-width="0.5"/>
+        <line x1="8"   y1="130" x2="252" y2="130" stroke="#0c2030" stroke-width="0.5"/>
+        <line x1="43"  y1="43"  x2="217" y2="217" stroke="#0c2030" stroke-width="0.5"/>
+        <line x1="217" y1="43"  x2="43"  y2="217" stroke="#0c2030" stroke-width="0.5"/>
+        <text x="130" y="20"  text-anchor="middle" fill="#1a3a50" font-size="8" font-family="Share Tech Mono,monospace">50cm</text>
+        <text x="130" y="51"  text-anchor="middle" fill="#1a3a50" font-size="8" font-family="Share Tech Mono,monospace">150cm</text>
+        <text x="130" y="82"  text-anchor="middle" fill="#1a3a50" font-size="8" font-family="Share Tech Mono,monospace">250cm</text>
+        <text x="130" y="112" text-anchor="middle" fill="#1a3a50" font-size="8" font-family="Share Tech Mono,monospace">400cm</text>
         <g class="sweep-g" clip-path="url(#rc)">
-          <path d="M135,135 L263,135 A128,128 0 0,1 225,225 Z" fill="rgba(0,229,255,0.12)"/>
-          <line x1="135" y1="135" x2="263" y2="135" stroke="#00e5ff" stroke-width="1.5" opacity="0.7" filter="url(#gl)"/>
+          <path d="M130,130 L252,130 A122,122 0 0,1 216,216 Z" fill="rgba(0,229,255,0.11)"/>
+          <line x1="130" y1="130" x2="252" y2="130" stroke="#00e5ff" stroke-width="1.5" opacity="0.7" filter="url(#gl)"/>
         </g>
-        <circle id="blip" cx="135" cy="135" r="6" fill="#ff2244" opacity="0" filter="url(#gl)"/>
-        <circle cx="135" cy="135" r="4" fill="#00e5ff" opacity="0.9" filter="url(#gl)"/>
-        <circle cx="135" cy="135" r="2" fill="#00e5ff"/>
+        <circle id="blip" cx="130" cy="130" r="6" fill="#ff2244" opacity="0" filter="url(#gl)"/>
+        <circle cx="130" cy="130" r="4" fill="#00e5ff" opacity="0.9" filter="url(#gl)"/>
+        <circle cx="130" cy="130" r="2" fill="#00e5ff"/>
       </svg>
-      <div class="distance-big" id="distNum">---</div>
-      <div class="distance-unit">CENTIMETERS</div>
-      <div class="zone-label" id="zoneLabel">STANDBY</div>
+      <div class="dist-num" id="distNum">---</div>
+      <div class="dist-unit">CENTIMETERS</div>
+      <div class="zlbl" id="zoneLabel">STANDBY</div>
     </div>
 
     <!-- RIGHT -->
     <div class="right-col">
 
+      <!-- CONNECTION CARD -->
       <div class="card">
-        <div class="card-title">// Connection</div>
+        <div class="ctitle">// Connection Method</div>
 
-        <div class="banner banner-warn" id="noSerialBanner" style="display:none">
-          <b>⚠ Browser Not Supported</b>
-          Use <b>Chrome or Edge</b> on PC/Laptop for Web Serial.<br>
-          On mobile → pair HC-05 via Bluetooth, then use Demo or Manual.
+        <!-- TABS: Mobile | PC -->
+        <div class="tabs">
+          <div class="tab active" id="tabMobile" onclick="switchTab('mobile')">Mobile / BT</div>
+          <div class="tab" id="tabPC" onclick="switchTab('pc')">PC / USB</div>
+          <div class="tab" id="tabManual" onclick="switchTab('manual')">Manual</div>
         </div>
 
-        <div class="banner banner-ok" id="connectedBanner" style="display:none">
+        <!-- MOBILE TAB -->
+        <div class="tab-pane active" id="paneMobile">
+          <div class="step-box info">
+            <b>📱 Mobile Steps (HC-05 / HC-06)</b>
+            1. Go to Phone <b>Settings → Bluetooth</b><br>
+            2. Pair your HC-05 (PIN: <b>1234</b> or <b>0000</b>)<br>
+            3. Come back here → tap button below<br>
+            4. Select your <b>HC-05</b> from list
+          </div>
+          <button class="btn btn-bt" id="btnBT" onclick="connectBT()">Connect Bluetooth (HC-05)</button>
+          <div class="sep"></div>
+          <button class="btn btn-demo" id="btnDemo" onclick="toggleDemo()">Run Demo Mode</button>
+        </div>
+
+        <!-- PC TAB -->
+        <div class="tab-pane" id="panePC">
+          <div class="step-box info">
+            <b>💻 PC / Laptop Steps</b>
+            1. Connect Arduino to PC via <b>USB cable</b><br>
+            2. Open Chrome or Edge browser<br>
+            3. Click button below → pick <b>COM port</b><br>
+            4. Data streams automatically
+          </div>
+          <button class="btn btn-ser" id="btnSerial" onclick="connectSerial()">Connect via USB Serial</button>
+        </div>
+
+        <!-- MANUAL TAB -->
+        <div class="tab-pane" id="paneManual">
+          <div class="step-box warn">
+            <b>⌨ Manual / Test Mode</b>
+            Type any distance value to test<br>
+            beeping and radar without hardware.
+          </div>
+          <div class="mrow">
+            <input class="min" id="manIn" type="number" min="0" max="500" placeholder="Distance in cm…" onkeydown="if(event.key==='Enter')sendManual()"/>
+            <button class="msend" onclick="sendManual()">SEND</button>
+          </div>
+          <div class="sep"></div>
+          <button class="btn btn-demo" id="btnDemo2" onclick="toggleDemo()">Run Auto Demo</button>
+        </div>
+
+        <!-- connected status -->
+        <div class="step-box ok" id="connOkBox" style="display:none;margin-top:10px;margin-bottom:0">
           <b>✓ Connected — Receiving Data</b>
-          HC-05 / HC-06 connected at 9600 baud.<br>
-          Live distance updates active.
+          <span id="connDetail">Live distance active.</span>
         </div>
 
-        <button class="btn btn-serial" id="btnSerial">Connect via USB / Serial (HC-05)</button>
-        <button class="btn btn-demo"   id="btnDemo">Run Demo Mode</button>
-        <button class="btn btn-mute"   id="btnMute">Mute Beeper</button>
-
-        <div class="card-title" style="margin-top:14px;margin-bottom:8px">// Manual Test Input</div>
-        <div class="manual-row">
-          <input class="manual-in" id="manualIn" type="number" min="0" max="400" placeholder="Type distance in cm…"/>
-          <button class="btn-send" id="btnSend">SEND</button>
-        </div>
+        <div class="sep" style="margin-top:10px"></div>
+        <button class="btn btn-mute" id="btnMute" onclick="toggleMute()">Mute Beeper</button>
       </div>
 
+      <!-- TELEMETRY -->
       <div class="card">
-        <div class="card-title">// Live Telemetry</div>
-        <div class="info-row"><span class="info-label">Connection</span><span class="info-val live" id="connStatus">OFFLINE</span></div>
-        <div class="info-row"><span class="info-label">Sensor</span><span class="info-val">HC-SR04</span></div>
-        <div class="info-row"><span class="info-label">Controller</span><span class="info-val">Arduino Nano</span></div>
-        <div class="info-row"><span class="info-label">Distance</span><span class="info-val live" id="liveDist">-- cm</span></div>
-        <div class="info-row"><span class="info-label">Beep Mode</span><span class="info-val live" id="beepMode">NONE</span></div>
-        <div class="info-row"><span class="info-label">Packets Rx</span><span class="info-val live" id="pktCount">0</span></div>
+        <div class="ctitle">// Live Telemetry</div>
+        <div class="irow"><span class="ilbl">Connection</span><span class="ival live" id="connStat">OFFLINE</span></div>
+        <div class="irow"><span class="ilbl">Sensor</span><span class="ival">HC-SR04</span></div>
+        <div class="irow"><span class="ilbl">Controller</span><span class="ival">Arduino Nano</span></div>
+        <div class="irow"><span class="ilbl">Distance</span><span class="ival live" id="liveDist">-- cm</span></div>
+        <div class="irow"><span class="ilbl">Beep Mode</span><span class="ival live" id="beepMode">NONE</span></div>
+        <div class="irow"><span class="ilbl">Packets Rx</span><span class="ival live" id="pktCnt">0</span></div>
       </div>
 
+      <!-- AUDIO BARS -->
       <div class="card">
-        <div class="card-title">// Audio Pattern</div>
-        <div class="beep-viz" id="beepViz"></div>
+        <div class="ctitle">// Audio Pattern</div>
+        <div class="bviz" id="beepViz"></div>
       </div>
 
+      <!-- ZONES -->
       <div class="card">
-        <div class="card-title">// Distance Zones</div>
-        <table class="zone-table">
+        <div class="ctitle">// Distance Zones</div>
+        <table class="ztbl">
           <tr>
             <td><span class="zdot" style="background:var(--danger)"></span><span style="color:var(--dim);font-family:Share Tech Mono,monospace">0 – 50 cm</span></td>
             <td style="color:var(--danger);font-family:Share Tech Mono,monospace;font-size:10px">RAPID BEEP</td>
@@ -209,162 +284,364 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
         </table>
       </div>
 
+      <!-- LOG -->
       <div class="card">
-        <div class="card-title">// Event Log</div>
-        <div class="log-box" id="logBox"></div>
+        <div class="ctitle">// Event Log</div>
+        <div class="lbox" id="logBox"></div>
       </div>
     </div>
   </div>
 
-  <div class="bottom-bar">
-    <div class="credit">SLRTCE — Sensor Lab &nbsp;|&nbsp; <span>Smart Glasses for Blind People</span></div>
-    <div class="credit">Harsh Sharma · Ramkumar Sharma · Rahul Rout &nbsp;|&nbsp; <span>IT-B</span></div>
+  <div class="bbar-foot">
+    <div class="cred">SLRTCE — Sensor Lab &nbsp;|&nbsp; <span>Smart Glasses for Blind People</span></div>
+    <div class="cred">Harsh Sharma · Ramkumar Sharma · Rahul Rout &nbsp;|&nbsp; <span>IT-B</span></div>
   </div>
 </div>
 
 <script>
-/* ================================================================
-   SMART GLASSES — COMPLETE WORKING SCRIPT
-   - Web Serial via getReader() (no pipeTo / TextDecoderStream)
-   - Buffered line parsing (handles partial \r\n from HC-05)
-   - AudioContext unlocked on first user gesture
-   - Demo mode, Manual input, Mute — all working
-   ================================================================ */
+// ─── STATE ────────────────────────────────────────────────
+let audioCtx=null, muted=false;
+let btDevice=null, btChar=null;
+let serialPort=null, serialReader=null;
+let demoTimer=null, beepLoopId=null;
+let currentZone='none', packets=0;
+let beepBars=[];
+let demoRunning=false;
 
-var audioCtx    = null;
-var muted       = false;
-var serialPort  = null;
-var serialReader= null;
-var demoRunning = false;
-var demoTimer   = null;
-var beepLoopId  = null;
-var currentZone = 'none';
-var packets     = 0;
-var beepBars    = [];
-
-/* ── BEEP BARS ─────────────────────────────────────────────────── */
-(function () {
-  var viz = document.getElementById('beepViz');
-  for (var i = 0; i < 20; i++) {
-    var b = document.createElement('div');
-    b.className = 'beep-bar';
-    b.style.height = (8 + Math.floor(Math.random() * 36)) + 'px';
-    viz.appendChild(b);
-    beepBars.push(b);
+// ─── BUILD BEEP BARS ──────────────────────────────────────
+(function(){
+  const v=document.getElementById('beepViz');
+  for(let i=0;i<20;i++){
+    const b=document.createElement('div');
+    b.className='bbar';
+    b.style.height=(8+Math.floor(Math.random()*36))+'px';
+    v.appendChild(b); beepBars.push(b);
   }
 })();
 
-/* ── SERIAL SUPPORT ────────────────────────────────────────────── */
-if (!('serial' in navigator)) {
-  document.getElementById('noSerialBanner').style.display = 'block';
-  document.getElementById('btnSerial').disabled = true;
-  log('Web Serial not supported — use Chrome/Edge on PC', 'w');
-}
-
-/* ── WIRE BUTTONS (addEventListener — works in all contexts) ───── */
-document.getElementById('btnSerial').addEventListener('click', handleSerialBtn);
-document.getElementById('btnDemo').addEventListener('click', toggleDemo);
-document.getElementById('btnMute').addEventListener('click', toggleMute);
-document.getElementById('btnSend').addEventListener('click', sendManual);
-document.getElementById('manualIn').addEventListener('keydown', function (e) {
-  if (e.key === 'Enter') sendManual();
-});
-
-/* ── LOG ───────────────────────────────────────────────────────── */
-function log(msg, type) {
-  type = type || 'i';
-  var box = document.getElementById('logBox');
-  var d = document.createElement('div');
-  d.className = 'l' + type;
-  d.textContent = '[' + new Date().toTimeString().slice(0, 8) + '] ' + msg;
-  box.insertBefore(d, box.firstChild);
-  if (box.children.length > 80) box.removeChild(box.lastChild);
-}
-
-/* ── AUDIO ─────────────────────────────────────────────────────── */
-function ensureAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  return audioCtx;
-}
-
-function beep(freq, dur, vol) {
-  if (muted) return;
-  try {
-    var ctx = ensureAudio();
-    var o = ctx.createOscillator();
-    var g = ctx.createGain();
-    o.connect(g);
-    g.connect(ctx.destination);
-    o.type = 'square';
-    o.frequency.value = freq;
-    g.gain.setValueAtTime(vol || 0.25, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
-    o.start(ctx.currentTime);
-    o.stop(ctx.currentTime + dur + 0.02);
-  } catch (e) {}
-}
-
-function flashBars(zone) {
-  var cls = zone === 'd' ? 'bd' : zone === 'w' ? 'bw' : '';
-  beepBars.forEach(function (b, i) {
-    b.className = 'beep-bar' + (cls ? ' ' + cls : '');
-    setTimeout(function () { b.classList.add('active'); }, i * 11);
-    setTimeout(function () { b.classList.remove('active'); }, i * 11 + 140);
+// ─── TABS ─────────────────────────────────────────────────
+function switchTab(t){
+  ['mobile','pc','manual'].forEach(n=>{
+    document.getElementById('tab'+n.charAt(0).toUpperCase()+n.slice(1)).classList.toggle('active',n===t);
+    document.getElementById('pane'+n.charAt(0).toUpperCase()+n.slice(1)).classList.toggle('active',n===t);
   });
 }
 
-function stopBeepLoop() {
-  if (beepLoopId) { clearTimeout(beepLoopId); beepLoopId = null; }
+// ─── LOG ──────────────────────────────────────────────────
+function log(msg,type='i'){
+  const box=document.getElementById('logBox');
+  const d=document.createElement('div');
+  d.className='l'+type;
+  d.textContent='['+new Date().toTimeString().slice(0,8)+'] '+msg;
+  box.insertBefore(d,box.firstChild);
+  if(box.children.length>80)box.removeChild(box.lastChild);
 }
 
-function startBeepLoop(zone) {
-  stopBeepLoop();
-  if (zone === 'none') return;
-  var cfg = zone === 'd' ? { f: 900, d: 0.055, i: 120 }
-          : zone === 'w' ? { f: 660, d: 0.10,  i: 380 }
-                         : { f: 440, d: 0.13,  i: 900 };
-  (function tick() {
-    beep(cfg.f, cfg.d);
-    flashBars(zone);
-    beepLoopId = setTimeout(tick, cfg.i);
-  })();
+// ─── AUDIO ────────────────────────────────────────────────
+function getACtx(){
+  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  return audioCtx;
+}
+function beep(freq,dur,vol=0.28){
+  if(muted)return;
+  try{
+    const ctx=getACtx();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='square';o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+    o.start();o.stop(ctx.currentTime+dur);
+  }catch(e){}
+}
+function flashBars(zone){
+  const c=zone==='d'?'bd':zone==='w'?'bw':'';
+  beepBars.forEach((b,i)=>{
+    b.className='bbar'+(c?' '+c:'');
+    setTimeout(()=>b.classList.add('on'),i*11);
+    setTimeout(()=>b.classList.remove('on'),i*11+140);
+  });
+}
+function stopLoop(){if(beepLoopId){clearTimeout(beepLoopId);beepLoopId=null;}}
+function beepLoop(zone){
+  stopLoop();
+  if(zone==='none')return;
+  const cfg=zone==='d'?{f:920,d:0.05,i:105}:zone==='w'?{f:660,d:0.10,i:360}:{f:440,d:0.13,i:860};
+  (function tick(){beep(cfg.f,cfg.d);flashBars(zone);beepLoopId=setTimeout(tick,cfg.i);})();
 }
 
-/* ── DISTANCE UPDATE ───────────────────────────────────────────── */
-function updateDist(cm) {
-  cm = Math.round(parseFloat(cm));
-  if (isNaN(cm) || cm < 0) return;
-  cm = Math.min(cm, 500);
+// ─── UPDATE RADAR & ZONE ──────────────────────────────────
+function updateDist(cm){
+  if(cm===null||isNaN(cm)){resetDisplay();return;}
+  cm=Math.round(Math.max(0,Math.min(500,cm)));
   packets++;
-  document.getElementById('distNum').textContent  = cm;
-  document.getElementById('liveDist').textContent = cm + ' cm';
-  document.getElementById('pktCount').textContent = packets;
-
-  /* Radar blip: 0–400 cm → radius 10–125 px up from centre */
-  var r = Math.min(125, Math.max(10, (cm / 400) * 125));
-  var blip = document.getElementById('blip');
-  blip.setAttribute('cy', String(135 - r));
-  blip.setAttribute('opacity', cm <= 400 ? '1' : '0');
-
-  var zone = cm <= 50 ? 'd' : cm <= 150 ? 'w' : cm <= 400 ? 's' : 'none';
-  applyZone(zone);
+  document.getElementById('distNum').textContent=cm;
+  document.getElementById('liveDist').textContent=cm+' cm';
+  document.getElementById('pktCnt').textContent=packets;
+  const r=Math.min(122,Math.max(10,(cm/400)*122));
+  const blip=document.getElementById('blip');
+  blip.setAttribute('cy',String(130-r));
+  blip.setAttribute('opacity',cm<=400?'1':'0');
+  const zone=cm<=50?'d':cm<=150?'w':cm<=400?'s':'none';
+  setZone(zone);
 }
 
-function applyZone(zone) {
-  if (zone === currentZone) return;
-  currentZone = zone;
+function setZone(zone){
+  if(zone===currentZone)return;
+  currentZone=zone;
+  const dn=document.getElementById('distNum');
+  const zl=document.getElementById('zoneLabel');
+  const sd=document.getElementById('sDot');
+  const bm=document.getElementById('beepMode');
+  dn.className='dist-num';zl.className='zlbl';
+  sd.className='sdot on';
+  if(zone==='d'){dn.classList.add('d');zl.classList.add('d');zl.textContent='⚠ DANGER — VERY CLOSE';sd.classList.add('alert');bm.textContent='RAPID';log('DANGER: <50cm','d');}
+  else if(zone==='w'){dn.classList.add('w');zl.classList.add('w');zl.textContent='CAUTION — MODERATE';bm.textContent='MEDIUM';log('CAUTION: 50–150cm','w');}
+  else if(zone==='s'){zl.textContent='CLEAR — FAR OBSTACLE';bm.textContent='SLOW';log('CLEAR: 150–400cm','s');}
+  else{zl.textContent='STANDBY — NO OBSTACLE';bm.textContent='NONE';sd.className='sdot';}
+  stopLoop();if(zone!=='none')beepLoop(zone);
+}
 
-  var dn  = document.getElementById('distNum');
-  var zl  = document.getElementById('zoneLabel');
-  var sd  = document.getElementById('sDot');
-  var bm  = document.getElementById('beepMode');
+function resetDisplay(){
+  document.getElementById('distNum').textContent='---';
+  document.getElementById('liveDist').textContent='-- cm';
+  document.getElementById('blip').setAttribute('opacity','0');
+  currentZone='';setZone('none');
+}
 
-  dn.className = 'distance-big';
-  zl.className = 'zone-label';
+// ─── BLUETOOTH (HC-05 already paired in OS) ───────────────
+// Uses Web Bluetooth to connect to already-paired HC-05.
+// HC-05 exposes SPP over BLE UUID on some firmware, but most
+// HC-05 are classic BT. We try multiple known service UUIDs.
+// Best approach: user pairs in OS Settings first, then we connect.
 
-  if (zone === 'd') {
-    dn.classList.add('danger');
-    zl.classList.add('danger');
-    zl.textContent = '⚠ DANGER — VERY CLOSE';
-    sd.clas
+const BT_SERVICES=[
+  '0000ffe0-0000-1000-8000-00805f9b34fb',  // HM-10 / HC-05 BLE shim
+  '00001101-0000-1000-8000-00805f9b34fb',  // SPP classic (may not work in web)
+  '6e400001-b5a3-f393-e0a9-e50e24dcca9e',  // Nordic UART
+];
+const BT_CHARS=[
+  '0000ffe1-0000-1000-8000-00805f9b34fb',
+  '6e400003-b5a3-f393-e0a9-e50e24dcca9e',
+];
+
+async function connectBT(){
+  if(btDevice){disconnectBT();return;}
+  if(!navigator.bluetooth){
+    log('Web Bluetooth not available in this browser','d');
+    alert('Web Bluetooth is not supported here.\nOn Android: use Chrome browser.\nOr switch to Manual tab to test.');
+    return;
+  }
+  try{
+    log('Opening Bluetooth picker — select your HC-05…','i');
+    document.getElementById('sDot').className='sdot scan';
+    document.getElementById('sTxt').textContent='SCANNING…';
+
+    // Request with all known optional services so device shows up
+    btDevice = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: BT_SERVICES
+    });
+
+    log('Selected: '+btDevice.name,'i');
+    btDevice.addEventListener('gattserverdisconnected', onBTDisconnect);
+
+    const server = await btDevice.gatt.connect();
+    log('GATT connected','s');
+
+    // Try each service until one works
+    let char = null;
+    for(const svcUUID of BT_SERVICES){
+      try{
+        const svc = await server.getPrimaryService(svcUUID);
+        for(const cUUID of BT_CHARS){
+          try{
+            char = await svc.getCharacteristic(cUUID);
+            log('Found characteristic: '+cUUID.slice(0,8)+'…','s');
+            break;
+          }catch(e){}
+        }
+        if(char)break;
+      }catch(e){}
+    }
+
+    if(!char){
+      // Try getting all characteristics from first available service
+      try{
+        const services = await server.getPrimaryServices();
+        for(const svc of services){
+          const chars = await svc.getCharacteristics();
+          for(const c of chars){
+            if(c.properties.notify||c.properties.read){char=c;break;}
+          }
+          if(char)break;
+        }
+      }catch(e){}
+    }
+
+    if(!char){
+      log('No readable characteristic found. Try Manual tab.','d');
+      btDevice.gatt.disconnect(); btDevice=null;
+      resetBTUI(); return;
+    }
+
+    btChar=char;
+    await char.startNotifications();
+    char.addEventListener('characteristicvaluechanged',onBTData);
+    log('Notifications started — waiting for data…','s');
+    setBTConnected(true, btDevice.name);
+
+  }catch(e){
+    log('BT Error: '+e.message,'d');
+    resetBTUI();
+    btDevice=null;
+  }
+}
+
+function onBTData(e){
+  const raw=new TextDecoder().decode(e.target.value);
+  const m=raw.match(/(\d+(\.\d+)?)/);
+  if(m){log('BT data: '+m[1]+' cm','s');updateDist(parseFloat(m[1]));}
+}
+
+function onBTDisconnect(){
+  log('Bluetooth disconnected','d');
+  resetBTUI();btDevice=null;btChar=null;
+  stopLoop();resetDisplay();
+}
+
+function disconnectBT(){
+  if(btDevice&&btDevice.gatt.connected)btDevice.gatt.disconnect();
+  resetBTUI();btDevice=null;btChar=null;
+  stopLoop();resetDisplay();log('BT disconnected','i');
+}
+
+function setBTConnected(on, name){
+  document.getElementById('btnBT').textContent=on?'Disconnect Bluetooth':'Connect Bluetooth (HC-05)';
+  document.getElementById('sDot').className='sdot'+(on?' on':'');
+  document.getElementById('sTxt').textContent=on?'BT CONNECTED':'DISCONNECTED';
+  document.getElementById('connStat').textContent=on?(name||'BT ONLINE'):'OFFLINE';
+  document.getElementById('connOkBox').style.display=on?'block':'none';
+  if(on)document.getElementById('connDetail').textContent=(name||'HC-05')+' connected.';
+}
+function resetBTUI(){setBTConnected(false,'');}
+
+// ─── WEB SERIAL (PC) ─────────────────────────────────────
+async function connectSerial(){
+  if(serialPort){disconnectSerial();return;}
+  if(!('serial' in navigator)){
+    log('Web Serial not supported. Use Chrome/Edge on PC.','d');
+    alert('Web Serial requires Chrome or Edge on a PC/Laptop.');
+    return;
+  }
+  try{
+    log('Opening serial port chooser…','i');
+    serialPort=await navigator.serial.requestPort({});
+    await serialPort.open({baudRate:9600});
+    log('Serial opened at 9600 baud','s');
+    setSerialUI(true);
+    readSerial();
+  }catch(e){
+    log('Serial error: '+e.message,'d');
+    serialPort=null;
+  }
+}
+
+async function readSerial(){
+  const dec=new TextDecoderStream();
+  serialPort.readable.pipeTo(dec.writable).catch(()=>{});
+  const reader=dec.readable.getReader();
+  serialReader=reader;
+  let buf='';
+  try{
+    while(true){
+      const{value,done}=await reader.read();
+      if(done)break;
+      buf+=value;
+      const lines=buf.split('\n');
+      buf=lines.pop();
+      lines.forEach(l=>{
+        const m=l.trim().match(/(\d+(\.\d+)?)/);
+        if(m)updateDist(parseFloat(m[1]));
+      });
+    }
+  }catch(e){log('Serial read ended','i');}
+}
+
+async function disconnectSerial(){
+  try{if(serialReader)await serialReader.cancel();}catch(e){}
+  try{if(serialPort&&serialPort.readable)await serialPort.close();}catch(e){}
+  serialPort=null;serialReader=null;
+  setSerialUI(false);stopLoop();resetDisplay();
+  log('Serial disconnected','i');
+}
+
+function setSerialUI(on){
+  document.getElementById('btnSerial').textContent=on?'Disconnect Serial':'Connect via USB Serial';
+  document.getElementById('sDot').className='sdot'+(on?' on':'');
+  document.getElementById('sTxt').textContent=on?'SERIAL CONNECTED':'DISCONNECTED';
+  document.getElementById('connStat').textContent=on?'SERIAL CONNECTED':'OFFLINE';
+  document.getElementById('connOkBox').style.display=on?'block':'none';
+  if(on)document.getElementById('connDetail').textContent='USB serial active at 9600 baud.';
+}
+
+// ─── DEMO MODE ────────────────────────────────────────────
+let demoDist=400,demoDir=-1;
+function toggleDemo(){
+  if(demoRunning){
+    demoRunning=false;
+    clearInterval(demoTimer);demoTimer=null;
+    document.getElementById('btnDemo').textContent='Run Demo Mode';
+    document.getElementById('btnDemo2').textContent='Run Auto Demo';
+    document.getElementById('sDot').className='sdot';
+    document.getElementById('sTxt').textContent='DISCONNECTED';
+    document.getElementById('connStat').textContent='OFFLINE';
+    document.getElementById('connOkBox').style.display='none';
+    stopLoop();resetDisplay();log('Demo stopped','i');
+    return;
+  }
+  demoRunning=true;demoDist=400;demoDir=-1;
+  document.getElementById('btnDemo').textContent='Stop Demo';
+  document.getElementById('btnDemo2').textContent='Stop Demo';
+  document.getElementById('sDot').className='sdot on';
+  document.getElementById('sTxt').textContent='DEMO MODE';
+  document.getElementById('connStat').textContent='SIMULATED';
+  document.getElementById('connOkBox').style.display='block';
+  document.getElementById('connDetail').textContent='Running simulation — no hardware needed.';
+  log('Demo started','i');
+  demoTimer=setInterval(()=>{
+    demoDist+=demoDir*(4+Math.random()*9);
+    if(demoDist<=3){demoDir=1;demoDist=3;}
+    if(demoDist>=420){demoDir=-1;demoDist=420;}
+    updateDist(Math.round(demoDist));
+  },280);
+}
+
+// ─── MANUAL INPUT ─────────────────────────────────────────
+function sendManual(){
+  const v=parseFloat(document.getElementById('manIn').value);
+  if(isNaN(v)||v<0||v>500){log('Enter 0–400 cm','d');return;}
+  log('Manual: '+Math.round(v)+' cm','i');
+  updateDist(v);
+}
+
+// ─── MUTE ─────────────────────────────────────────────────
+function toggleMute(){
+  muted=!muted;
+  document.getElementById('btnMute').textContent=muted?'Unmute Beeper':'Mute Beeper';
+  log(muted?'Muted':'Unmuted','i');
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+// Auto-detect mobile vs desktop
+if(/Android|iPhone|iPad/i.test(navigator.userAgent)){
+  switchTab('mobile');
+  log('Mobile detected — use Bluetooth tab','i');
+} else {
+  log('Desktop detected — use PC/USB tab','i');
+}
+log('System ready v3.0','i');
+</script>
+</body>
+</html>
