@@ -254,234 +254,124 @@ header{display:flex;align-items:center;justify-content:space-between;padding:18p
 
 <script>
 // ── STATE ──────────────────────────────────────────────────────────
-let audioCtx=null, muted=false;
-let serialPort=null, serialReader=null;
-let demoTimer=null, beepLoopId=null;
-let currentZone='none', packets=0;
-let beepBars=[];
+let audioCtx = null, muted = false;
+let serialPort = null, serialReader = null, readLoopActive = false;
+let demoTimer = null, beepLoopId = null;
+let currentZone = 'none', packets = 0;
+let beepBars = [];
 
 // ── BUILD BEEP BARS ────────────────────────────────────────────────
-(function(){
-  const viz=document.getElementById('beepViz');
-  for(let i=0;i<20;i++){
-    const b=document.createElement('div');
-    b.className='beep-bar';
-    b.style.height=(8+Math.floor(Math.random()*36))+'px';
+(function () {
+  const viz = document.getElementById('beepViz');
+  for (let i = 0; i < 20; i++) {
+    const b = document.createElement('div');
+    b.className = 'beep-bar';
+    b.style.height = (8 + Math.floor(Math.random() * 36)) + 'px';
     viz.appendChild(b);
     beepBars.push(b);
   }
 })();
 
 // ── SERIAL SUPPORT CHECK ───────────────────────────────────────────
-if(!('serial' in navigator)){
-  document.getElementById('noSerialBanner').style.display='block';
-  document.getElementById('btnSerial').disabled=true;
+if (!('serial' in navigator)) {
+  document.getElementById('noSerialBanner').style.display = 'block';
+  document.getElementById('btnSerial').disabled = true;
 }
 
 // ── LOG ────────────────────────────────────────────────────────────
-function log(msg,type='i'){
-  const box=document.getElementById('logBox');
-  const d=document.createElement('div');
-  d.className='l'+type;
-  d.textContent='['+new Date().toTimeString().slice(0,8)+'] '+msg;
-  box.insertBefore(d,box.firstChild);
-  if(box.children.length>80)box.removeChild(box.lastChild);
+function log(msg, type = 'i') {
+  const box = document.getElementById('logBox');
+  const d = document.createElement('div');
+  d.className = 'l' + type;
+  d.textContent = '[' + new Date().toTimeString().slice(0, 8) + '] ' + msg;
+  box.insertBefore(d, box.firstChild);
+  if (box.children.length > 80) box.removeChild(box.lastChild);
 }
 
 // ── AUDIO ──────────────────────────────────────────────────────────
-function getAudio(){
-  if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
-function beep(freq,dur,vol){
-  if(muted)return;
-  try{
-    const ctx=getAudio();
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    o.connect(g);g.connect(ctx.destination);
-    o.type='square';o.frequency.value=freq;
-    g.gain.setValueAtTime(vol||0.27,ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
-    o.start();o.stop(ctx.currentTime+dur);
-  }catch(e){}
+function beep(freq, dur, vol) {
+  if (muted) return;
+  try {
+    const ctx = getAudio();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'square'; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || 0.27, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    o.start(); o.stop(ctx.currentTime + dur);
+  } catch (e) {}
 }
-function flashBars(zone){
-  const cls=zone==='d'?'bd':zone==='w'?'bw':'';
-  beepBars.forEach((b,i)=>{
-    b.className='beep-bar'+(cls?' '+cls:'');
-    setTimeout(()=>b.classList.add('active'),i*11);
-    setTimeout(()=>b.classList.remove('active'),i*11+140);
+function flashBars(zone) {
+  const cls = zone === 'd' ? 'bd' : zone === 'w' ? 'bw' : '';
+  beepBars.forEach((b, i) => {
+    b.className = 'beep-bar' + (cls ? ' ' + cls : '');
+    setTimeout(() => b.classList.add('active'), i * 11);
+    setTimeout(() => b.classList.remove('active'), i * 11 + 140);
   });
 }
-function stopLoop(){if(beepLoopId){clearTimeout(beepLoopId);beepLoopId=null;}}
-function beepLoop(zone){
+function stopLoop() { if (beepLoopId) { clearTimeout(beepLoopId); beepLoopId = null; } }
+function beepLoop(zone) {
   stopLoop();
-  if(zone==='none')return;
-  const cfg=zone==='d'?{f:900,d:0.055,i:110}:zone==='w'?{f:660,d:0.10,i:370}:{f:440,d:0.13,i:880};
-  (function tick(){
-    beep(cfg.f,cfg.d);
+  if (zone === 'none') return;
+  const cfg = zone === 'd' ? { f: 900, d: 0.055, i: 110 }
+            : zone === 'w' ? { f: 660, d: 0.10,  i: 370 }
+                           : { f: 440, d: 0.13,  i: 880 };
+  (function tick() {
+    beep(cfg.f, cfg.d);
     flashBars(zone);
-    beepLoopId=setTimeout(tick,cfg.i);
+    beepLoopId = setTimeout(tick, cfg.i);
   })();
 }
 
 // ── UPDATE DISTANCE ────────────────────────────────────────────────
-function updateDist(cm){
-  if(cm===null||isNaN(cm)){resetDisplay();return;}
-  cm=Math.round(Math.max(0,Math.min(500,cm)));
+function updateDist(cm) {
+  if (cm === null || isNaN(cm)) { resetDisplay(); return; }
+  cm = Math.round(Math.max(0, Math.min(500, cm)));
   packets++;
-  document.getElementById('distNum').textContent=cm;
-  document.getElementById('liveDist').textContent=cm+' cm';
-  document.getElementById('pktCount').textContent=packets;
+  document.getElementById('distNum').textContent = cm;
+  document.getElementById('liveDist').textContent = cm + ' cm';
+  document.getElementById('pktCount').textContent = packets;
 
   // radar blip: 0–400cm maps to radius 10–128px from center
-  const r=Math.min(128,Math.max(10,(cm/400)*128));
-  const blip=document.getElementById('blip');
-  blip.setAttribute('cx','135');
-  blip.setAttribute('cy',String(135-r));
-  blip.setAttribute('opacity',cm<=400?'1':'0');
+  const r = Math.min(128, Math.max(10, (cm / 400) * 128));
+  const blip = document.getElementById('blip');
+  blip.setAttribute('cx', '135');
+  blip.setAttribute('cy', String(135 - r));
+  blip.setAttribute('opacity', cm <= 400 ? '1' : '0');
 
-  const zone=cm<=50?'d':cm<=150?'w':cm<=400?'s':'none';
+  const zone = cm <= 50 ? 'd' : cm <= 150 ? 'w' : cm <= 400 ? 's' : 'none';
   setZone(zone);
 }
 
-function setZone(zone){
-  if(zone===currentZone)return;
-  currentZone=zone;
-  const dn=document.getElementById('distNum');
-  const zl=document.getElementById('zoneLabel');
-  const sd=document.getElementById('sDot');
-  const bm=document.getElementById('beepMode');
-  dn.className='distance-big';
-  zl.className='zone-label';
-  sd.className='status-dot connected';
-  if(zone==='d'){
-    dn.classList.add('danger');zl.classList.add('danger');
-    zl.textContent='⚠ DANGER — VERY CLOSE';
-    sd.classList.add('alerting');bm.textContent='RAPID';
-    log('DANGER: obstacle < 50cm','d');
-  } else if(zone==='w'){
-    dn.classList.add('warn');zl.classList.add('warn');
-    zl.textContent='CAUTION — MODERATE DISTANCE';
-    bm.textContent='MEDIUM';log('CAUTION: 50–150cm','w');
-  } else if(zone==='s'){
-    zl.textContent='CLEAR — OBSTACLE DETECTED FAR';
-    bm.textContent='SLOW';log('CLEAR: 150–400cm','s');
+function setZone(zone) {
+  if (zone === currentZone) return;
+  currentZone = zone;
+  const dn = document.getElementById('distNum');
+  const zl = document.getElementById('zoneLabel');
+  const sd = document.getElementById('sDot');
+  const bm = document.getElementById('beepMode');
+  dn.className = 'distance-big';
+  zl.className = 'zone-label';
+  sd.className = 'status-dot connected';
+  if (zone === 'd') {
+    dn.classList.add('danger'); zl.classList.add('danger');
+    zl.textContent = '⚠ DANGER — VERY CLOSE';
+    sd.classList.add('alerting'); bm.textContent = 'RAPID';
+    log('DANGER: obstacle < 50cm', 'd');
+  } else if (zone === 'w') {
+    dn.classList.add('warn'); zl.classList.add('warn');
+    zl.textContent = 'CAUTION — MODERATE DISTANCE';
+    bm.textContent = 'MEDIUM'; log('CAUTION: 50–150cm', 'w');
+  } else if (zone === 's') {
+    zl.textContent = 'CLEAR — OBSTACLE DETECTED FAR';
+    bm.textContent = 'SLOW'; log('CLEAR: 150–400cm', 's');
   } else {
-    zl.textContent='STANDBY — NO OBSTACLE';
-    bm.textContent='NONE';
+    zl.textContent = 'STANDBY — NO OBSTACLE';
+    bm.textContent = 'NONE';
   }
   stopLoop();
-  if(zone!=='none')beepLoop(zone);
-}
-
-function resetDisplay(){
-  document.getElementById('distNum').textContent='---';
-  document.getElementById('liveDist').textContent='-- cm';
-  document.getElementById('blip').setAttribute('opacity','0');
-  setZone('none');
-}
-
-// ── WEB SERIAL ─────────────────────────────────────────────────────
-async function connectSerial(){
-  if(serialPort){disconnectSerial();return;}
-  try{
-    log('Opening serial port chooser…','i');
-    // Request any serial port — user picks from real OS list
-    serialPort=await navigator.serial.requestPort({});
-    await serialPort.open({baudRate:9600});
-    log('Port opened — baud 9600','s');
-    setSerialUI(true);
-    readLoop();
-  }catch(e){
-    log('Error: '+e.message,'d');
-    serialPort=null;
-  }
-}
-
-async function readLoop(){
-  const dec=new TextDecoderStream();
-  const pipeDone=serialPort.readable.pipeTo(dec.writable);
-  const reader=dec.readable.getReader();
-  serialReader=reader;
-  let buf='';
-  try{
-    while(true){
-      const{value,done}=await reader.read();
-      if(done)break;
-      buf+=value;
-      const lines=buf.split('\n');
-      buf=lines.pop();
-      lines.forEach(line=>{
-        const m=line.trim().match(/(\d+(\.\d+)?)/);
-        if(m)updateDist(parseFloat(m[1]));
-      });
-    }
-  }catch(e){log('Read ended','i');}
-}
-
-async function disconnectSerial(){
-  try{if(serialReader)await serialReader.cancel();}catch(e){}
-  try{if(serialPort)await serialPort.close();}catch(e){}
-  serialPort=null;serialReader=null;
-  setSerialUI(false);
-  stopLoop();resetDisplay();
-  log('Serial disconnected','i');
-}
-
-function setSerialUI(on){
-  document.getElementById('btnSerial').textContent=on?'Disconnect Serial':'Connect via USB / Serial (HC-05)';
-  document.getElementById('connStatus').textContent=on?'SERIAL CONNECTED':'OFFLINE';
-  document.getElementById('sDot').className='status-dot'+(on?' connected':'');
-  document.getElementById('sTxt').textContent=on?'CONNECTED':'DISCONNECTED';
-  document.getElementById('connectedBanner').style.display=on?'block':'none';
-}
-
-// ── DEMO MODE ──────────────────────────────────────────────────────
-let demoDist=400,demoDir=-1;
-function toggleDemo(){
-  if(demoTimer){
-    clearInterval(demoTimer);demoTimer=null;
-    document.getElementById('btnDemo').textContent='Run Demo Mode';
-    document.getElementById('sDot').className='status-dot';
-    document.getElementById('sTxt').textContent='DISCONNECTED';
-    document.getElementById('connStatus').textContent='OFFLINE';
-    stopLoop();resetDisplay();log('Demo stopped','i');
-    return;
-  }
-  demoDist=400;demoDir=-1;
-  document.getElementById('btnDemo').textContent='Stop Demo';
-  document.getElementById('sDot').className='status-dot connected';
-  document.getElementById('sTxt').textContent='DEMO MODE';
-  document.getElementById('connStatus').textContent='SIMULATED';
-  log('Demo started — simulating approach','i');
-  demoTimer=setInterval(()=>{
-    demoDist+=demoDir*(4+Math.random()*9);
-    if(demoDist<=3){demoDir=1;demoDist=3;}
-    if(demoDist>=420){demoDir=-1;demoDist=420;}
-    updateDist(Math.round(demoDist));
-  },280);
-}
-
-// ── MANUAL INPUT ───────────────────────────────────────────────────
-function sendManual(){
-  const v=parseFloat(document.getElementById('manualIn').value);
-  if(isNaN(v)||v<0||v>500){log('Invalid value — enter 0 to 400','d');return;}
-  log('Manual: '+Math.round(v)+' cm','i');
-  updateDist(v);
-}
-
-// ── MUTE ───────────────────────────────────────────────────────────
-function toggleMute(){
-  muted=!muted;
-  document.getElementById('btnMute').textContent=muted?'Unmute Beeper':'Mute Beeper';
-  log(muted?'Beeper muted':'Beeper unmuted','i');
-}
-
-// ── INIT ───────────────────────────────────────────────────────────
-log('System ready.','i');
-log('PC/Laptop: click Connect via USB Serial.','i');
-log('Mobile/No hardware: use Demo Mode.','i');
-</script>
-</body>
-</html>
