@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Glasses — Assistive Navigation System</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050a0f;
+  --panel:#070d16;
+  --border:#0c2030;
+  --accent:#00e5ff;
+  --accent2:#ff6b00;
+  --warn:#ffcc00;
+  --danger:#ff2244;
+  --safe:#00ff88;
+  --text:#b8dff0;
+  --dim:#2a4a60;
+}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:linear-gradient(rgba(0,229,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.025) 1px,transparent 1px);
+  background-size:50px 50px;
+  pointer-events:none;z-index:0;
+}
+.scanline{
+  position:fixed;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,rgba(0,229,255,0.6),transparent);
+  animation:scan 5s linear infinite;
+  pointer-events:none;z-index:999;
+}
+@keyframes scan{0%{top:-3px}100%{top:100vh}}
+
+.wrap{position:relative;z-index:2;max-width:1080px;margin:0 auto;padding:16px 20px}
+
+/* HEADER */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0 16px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:24px;
+}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-icon{
+  width:48px;height:48px;
+  border:2px solid var(--accent);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+  box-shadow:0 0 16px rgba(0,229,255,0.3);
+}
+.logo-icon::before{
+  content:'';
+  position:absolute;
+  width:34px;height:14px;
+  border:2px solid var(--accent);
+  border-radius:20px;
+  opacity:0.6;
+}
+.logo-icon::after{
+  content:'';
+  position:absolute;
+  width:8px;height:8px;
+  background:var(--accent);
+  border-radius:50%;
+  box-shadow:0 0 8px var(--accent);
+}
+.logo-text h1{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px}
+.logo-text p{font-size:11px;color:var(--dim);letter-spacing:3px;text-transform:uppercase;margin-top:2px}
+
+.status-bar{display:flex;align-items:center;gap:10px;font-family:'Share Tech Mono',monospace;font-size:12px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--dim);transition:all 0.3s}
+.status-dot.connected{background:var(--safe);box-shadow:0 0 8px var(--safe)}
+.status-dot.scanning{background:var(--warn);box-shadow:0 0 8px var(--warn);animation:pulse 1s infinite}
+.status-dot.alert{background:var(--danger);box-shadow:0 0 10px var(--danger);animation:pulse 0.3s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* MAIN GRID */
+.grid{display:grid;grid-template-columns:1fr 360px;gap:20px}
+@media(max-width:750px){.grid{grid-template-columns:1fr}}
+
+/* RADAR PANEL */
+.radar-panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:24px;
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;overflow:hidden;
+}
+.radar-panel::before{
+  content:'OBSTACLE DETECTION RADAR';
+  position:absolute;top:14px;left:20px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  color:var(--dim);letter-spacing:3px;
+}
+.radar-wrap{position:relative;width:280px;height:280px;margin:28px auto 16px}
+.radar-svg{width:100%;height:100%}
+
+/* Sweep animation */
+@keyframes sweep{0%{transform:rotate(-90deg)}100%{transform:rotate(270deg)}}
+.sweep-line{
+  transform-origin:50% 50%;
+  animation:sweep 3s linear infinite;
+}
+
+.distance-big{
+  font-family:'Orbitron',monospace;
+  font-size:52px;font-weight:900;
+  color:var(--safe);
+  text-align:center;
+  line-height:1;
+  text-shadow:0 0 20px rgba(0,255,136,0.5);
+  transition:color 0.3s,text-shadow 0.3s;
+}
+.distance-big.warn{color:var(--warn);text-shadow:0 0 20px rgba(255,204,0,0.5)}
+.distance-big.danger{color:var(--danger);text-shadow:0 0 20px rgba(255,34,68,0.5)}
+.distance-unit{font-size:16px;color:var(--dim);font-family:'Share Tech Mono',monospace;letter-spacing:2px;text-align:center;margin-top:4px}
+
+.zone-label{
+  font-family:'Orbitron',monospace;font-size:11px;letter-spacing:3px;
+  text-transform:uppercase;text-align:center;margin-top:12px;
+  padding:6px 20px;
+  border-radius:4px;
+  border:1px solid var(--safe);
+  color:var(--safe);
+  transition:all 0.3s;
+}
+.zone-label.warn{border-color:var(--warn);color:var(--warn)}
+.zone-label.danger{border-color:var(--danger);color:var(--danger);animation:pulse 0.5s infinite}
+
+/* RIGHT PANEL */
+.right-col{display:flex;flex-direction:column;gap:16px}
+
+/* CONNECT CARD */
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+}
+.card-title{
+  font-family:'Share Tech Mono',monospace;
+  font-size:10px;letter-spacing:3px;color:var(--dim);
+  text-transform:uppercase;margin-bottom:14px;
+}
+
+.btn{
+  width:100%;padding:12px 16px;
+  border-radius:6px;cursor:pointer;
+  font-family:'Orbitron',monospace;font-size:11px;
+  letter-spacing:2px;text-transform:uppercase;
+  border:1px solid;
+  transition:all 0.2s;
+  margin-bottom:8px;
+}
+.btn:last-child{margin-bottom:0}
+.btn-connect{
+  background:rgba(0,229,255,0.08);
+  border-color:var(--accent);color:var(--accent);
+}
+.btn-connect:hover{background:rgba(0,229,255,0.18);box-shadow:0 0 12px rgba(0,229,255,0.2)}
+.btn-demo{
+  background:rgba(255,107,0,0.08);
+  border-color:var(--accent2);color:var(--accent2);
+}
+.btn-demo:hover{background:rgba(255,107,0,0.18)}
+.btn-mute{
+  background:rgba(255,204,0,0.06);
+  border-color:var(--warn);color:var(--warn);
+}
+
+/* INFO rows */
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-label{color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px}
+.info-val{color:var(--text);font-family:'Share Tech Mono',monospace;font-size:12px}
+.info-val.live{color:var(--accent)}
+
+/* BEEP PATTERN DISPLAY */
+.beep-viz{
+  display:flex;align-items:flex-end;gap:5px;
+  height:48px;margin-top:12px;
+}
+.beep-bar{
+  flex:1;background:var(--dim);border-radius:3px 3px 0 0;
+  transition:background 0.1s;
+  min-height:4px;
+}
+.beep-bar.active{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.beep-bar.danger-bar.active{background:var(--danger);box-shadow:0 0 6px var(--danger)}
+.beep-bar.warn-bar.active{background:var(--warn);box-shadow:0 0 6px var(--warn)}
+
+/* ZONE TABLE */
+.zone-table{width:100%;border-collapse:collapse;font-size:12px}
+.zone-table td{padding:7px 8px;border-bottom:1px solid var(--border)}
+.zone-table tr:last-child td{border-bottom:none}
+.zone-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.dot-safe{background:var(--safe);box-shadow:0 0 4px var(--safe)}
+.dot-warn{background:var(--warn);box-shadow:0 0 4px var(--warn)}
+.dot-danger{background:var(--danger);box-shadow:0 0 4px var(--danger)}
+
+/* LOG */
+.log-box{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  color:var(--dim);height:90px;overflow-y:auto;
+  line-height:1.8;padding:2px 0;
+}
+.log-box div{border-bottom:1px solid rgba(12,32,48,0.5);padding:1px 0}
+.log-entry-danger{color:var(--danger)}
+.log-entry-warn{color:var(--warn)}
+.log-entry-safe{color:var(--safe)}
+.log-entry-info{color:var(--accent)}
+
+/* BOTTOM STRIP */
+.bottom-bar{
+  margin-top:20px;
+  padding:14px 20px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.credit{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:2px}
+.credit span{color:var(--accent)}
+
+/* scrollbar */
+.log-box::-webkit-scrollbar{width:4px}
+.log-box::-webkit-scrollbar-track{background:transparent}
+.log-box::-webkit-scrollbar-thumb{background:var(--dim);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <div class="logo-text">
+        <h1>SMART GLASSES</h1>
+        <p>Assistive Navigation System v1.0</p>
+      </div>
+    </div>
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText" style="color:var(--dim)">DISCONNECTED</span>
+    </div>
+  </header>
+
+  <!-- GRID -->
+  <div class="grid">
+
+    <!-- LEFT: RADAR -->
+    <div class="radar-panel">
+      <svg class="radar-svg" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="rg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.08"/>
+            <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- background fill -->
+        <circle cx="140" cy="140" r="130" fill="url(#rg)"/>
+
+        <!-- range rings -->
+        <circle cx="140" cy="140" r="32"  fill="none" stroke="#0c2030" stroke-width="1"/>
+        <circle cx="140" cy="140" r="65"  fill="none" stroke="#0c2030" stroke-width="1"/>
+        <circle cx="140" cy="140" r="98"  fill="none" stroke="#0c2030" stroke-width="1"/>
+        <circle cx="140" cy="140" r="130" fill="none" stroke="#0c2030" stroke-width="1"/>
+
+        <!-- crosshairs -->
+        <line x1="140" y1="10" x2="140" y2="270" stroke="#0c2030" stroke-width="0.5"/>
+        <line x1="10" y1="140" x2="270" y2="140" stroke="#0c2030" stroke-width="0.5"/>
+        <line x1="48" y1="48" x2="232" y2="232" stroke="#0c2030" stroke-width="0.5"/>
+        <line x1="232" y1="48" x2="48" y2="232" stroke="#0c2030" stroke-width="0.5"/>
+
+        <!-- labels -->
+        <text x="140" y="24" text-anchor="middle" fill="#2a4a60" font-size="9" font-family="Share Tech Mono,monospace">50cm</text>
+        <text x="140" y="57" text-anchor="middle" fill="#2a4a60" font-size="9" font-family="Share Tech Mono,monospace">150cm</text>
+        <text x="140" y="90" text-anchor="middle" fill="#2a4a60" font-size="9" font-family="Share Tech Mono,monospace">250cm</text>
+        <text x="140" y="122" text-anchor="middle" fill="#2a4a60" font-size="9" font-family="Share Tech Mono,monospace">400cm</text>
+
+        <!-- sweep (clip to circle) -->
+        <clipPath id="radarClip">
+          <circle cx="140" cy="140" r="130"/>
+        </clipPath>
+        <g clip-path="url(#radarClip)" class="sweep-line" id="sweepGroup">
+          <defs>
+            <radialGradient id="sweepGrad" cx="140" cy="140" r="130" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.0"/>
+              <stop offset="100%" stop-color="#00e5ff" stop-opacity="0.25"/>
+            </radialGradient>
+          </defs>
+          <!-- sweep sector ~60 deg -->
+          <path id="sweepSector" d="M140,140 L270,140 A130,130 0 0,1 205,252 Z" fill="url(#sweepGrad)" opacity="0.5"/>
+          <line x1="140" y1="140" x2="270" y2="140" stroke="#00e5ff" stroke-width="1.5" opacity="0.8" filter="url(#glow)"/>
+        </g>
+
+        <!-- obstacle blip -->
+        <circle cx="140" cy="140" r="6" id="blipDot" fill="var(--danger)" opacity="0" filter="url(#glow)"/>
+
+        <!-- center cross -->
+        <circle cx="140" cy="140" r="4" fill="#00e5ff" opacity="0.8" filter="url(#glow)"/>
+        <circle cx="140" cy="140" r="2" fill="#00e5ff"/>
+      </svg>
+
+      <!-- DISTANCE DISPLAY -->
+      <div class="distance-big" id="distNum">---</div>
+      <div class="distance-unit">CENTIMETERS</div>
+      <div class="zone-label" id="zoneLabel">STANDBY</div>
+    </div>
+
+    <!-- RIGHT COL -->
+    <div class="right-col">
+
+      <!-- CONNECT CARD -->
+      <div class="card">
+        <div class="card-title">// Bluetooth Control</div>
+        <button class="btn btn-connect" id="btnConnect" onclick="connectBluetooth()">Connect to Smart Glasses</button>
+        <button class="btn btn-demo" onclick="startDemo()">Run Demo Mode</button>
+        <button class="btn btn-mute" id="btnMute" onclick="toggleMute()">Mute Beeper</button>
+      </div>
+
+      <!-- LIVE INFO -->
+      <div class="card">
+        <div class="card-title">// Live Telemetry</div>
+        <div class="info-row"><span class="info-label">BT STATUS</span><span class="info-val live" id="btStatus">OFFLINE</span></div>
+        <div class="info-row"><span class="info-label">SENSOR</span><span class="info-val">HC-SR04</span></div>
+        <div class="info-row"><span class="info-label">MCU</span><span class="info-val">Arduino Nano</span></div>
+        <div class="info-row"><span class="info-label">DISTANCE</span><span class="info-val live" id="liveDistance">-- cm</span></div>
+        <div class="info-row"><span class="info-label">BEEP MODE</span><span class="info-val live" id="beepMode">NONE</span></div>
+        <div class="info-row"><span class="info-label">PACKETS</span><span class="info-val live" id="packetCount">0</span></div>
+      </div>
+
+      <!-- BEEP VIZ -->
+      <div class="card">
+        <div class="card-title">// Audio Pattern</div>
+        <div class="beep-viz" id="beepViz">
+          <!-- bars filled by JS -->
+        </div>
+      </div>
+
+      <!-- ZONE TABLE -->
+      <div class="card">
+        <div class="card-title">// Distance Zones</div>
+        <table class="zone-table">
+          <tr>
+            <td><span class="zone-dot dot-danger"></span><span style="font-size:11px;font-family:Share Tech Mono,monospace;color:var(--dim)">0 – 50 cm</span></td>
+            <td style="color:var(--danger);font-family:Share Tech Mono,monospace;font-size:11px">RAPID BEEP</td>
+          </tr>
+          <tr>
+            <td><span class="zone-dot dot-warn"></span><span style="font-size:11px;font-family:Share Tech Mono,monospace;color:var(--dim)">50 – 150 cm</span></td>
+            <td style="color:var(--warn);font-family:Share Tech Mono,monospace;font-size:11px">MEDIUM BEEP</td>
+          </tr>
+          <tr>
+            <td><span class="zone-dot dot-safe"></span><span style="font-size:11px;font-family:Share Tech Mono,monospace;color:var(--dim)">150 – 400 cm</span></td>
+            <td style="color:var(--safe);font-family:Share Tech Mono,monospace;font-size:11px">SLOW BEEP</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- EVENT LOG -->
+      <div class="card">
+        <div class="card-title">// Event Log</div>
+        <div class="log-box" id="logBox"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="bottom-bar">
+    <div class="credit">SLRTCE — Sensor Lab Project &nbsp;|&nbsp; <span>Smart Glasses for Blind People</span></div>
+    <div class="credit">Harsh Sharma · Ramkumar Sharma · Rahul Rout &nbsp;|&nbsp; <span>IT-B</span></div>
+  </div>
+
+</div>
+
+<script>
+// ---- STATE ----
+let audioCtx = null;
+let muted = false;
+let btChar = null;
+let demoInterval = null;
+let beepTimeout = null;
+let currentDist = null;
+let packets = 0;
+let beepBars = [];
+let currentZone = 'none';
+let beepLoopId = null;
+
+// ---- BUILD BEEP BARS ----
+(function(){
+  const viz = document.getElementById('beepViz');
+  for(let i=0;i<20;i++){
+    const b = document.createElement('div');
+    b.className = 'beep-bar';
+    // random heights for visual variety
+    const h = 10 + Math.floor(Math.random()*38);
+    b.style.height = h+'px';
+    viz.appendChild(b);
+    beepBars.push(b);
+  }
+})();
+
+// ---- LOG ----
+function log(msg, type='info'){
+  const box = document.getElementById('logBox');
+  const d = document.createElement('div');
+  const t = new Date().toTimeString().slice(0,8);
+  d.className = 'log-entry-'+type;
+  d.textContent = '['+t+'] '+msg;
+  box.insertBefore(d, box.firstChild);
+  if(box.children.length > 60) box.removeChild(box.lastChild);
+}
+
+// ---- AUDIO ----
+function getAudio(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function beep(freq, duration, vol){
+  if(muted) return;
+  try{
+    const ctx = getAudio();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol||0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  }catch(e){}
+}
+
+// ---- BEEP PATTERNS ----
+function stopBeepLoop(){
+  if(beepLoopId) { clearTimeout(beepLoopId); beepLoopId = null; }
+}
+
+function beepLoop(zone){
+  stopBeepLoop();
+  if(zone === 'none') return;
+  function tick(){
+    let freq, dur, interval;
+    if(zone === 'danger'){
+      freq=880; dur=0.06; interval=120;
+    } else if(zone === 'warn'){
+      freq=660; dur=0.1; interval=380;
+    } else {
+      freq=440; dur=0.12; interval=900;
+    }
+    beep(freq, dur);
+    flashBars(zone);
+    beepLoopId = setTimeout(tick, interval);
+  }
+  tick();
+}
+
+function flashBars(zone){
+  const cls = zone==='danger'?'danger-bar':zone==='warn'?'warn-bar':'';
+  beepBars.forEach((b,i)=>{
+    b.className = 'beep-bar'+(cls?' '+cls:'');
+    setTimeout(()=>{ b.classList.add('active'); }, i*12);
+    setTimeout(()=>{ b.classList.remove('active'); }, i*12+120);
+  });
+}
+
+// ---- UPDATE UI ----
+function updateDistance(cm){
+  if(cm === null || isNaN(cm)){
+    document.getElementById('distNum').textContent = '---';
+    document.getElementById('liveDistance').textContent = '-- cm';
+    setZone('none');
+    return;
+  }
+  cm = Math.round(cm);
+  currentDist = cm;
+  packets++;
+  document.getElementById('distNum').textContent = cm;
+  document.getElementById('liveDistance').textContent = cm+' cm';
+  document.getElementById('packetCount').textContent = packets;
+
+  // blip position on radar (map 0-400cm to radius 130)
+  const radius = Math.min(130, Math.max(6, (cm/400)*130));
+  // place blip at top (12 o'clock offset from center)
+  const bx = 140;
+  const by = 140 - radius;
+  const blip = document.getElementById('blipDot');
+  blip.setAttribute('cx', bx);
+  blip.setAttribute('cy', by);
+  blip.setAttribute('opacity', cm <= 400 ? '1' : '0');
+
+  if(cm <= 50) setZone('danger');
+  else if(cm <= 150) setZone('warn');
+  else if(cm <= 400) setZone('safe');
+  else setZone('none');
+}
+
+function setZone(zone){
+  if(zone === currentZone) return;
+  currentZone = zone;
+
+  const dn = document.getElementById('distNum');
+  const zl = document.getElementById('zoneLabel');
+  const sd = document.getElementById('statusDot');
+
+  dn.className = 'distance-big';
+  zl.className = 'zone-label';
+  sd.className = 'status-dot connected';
+
+  const bm = document.getElementById('beepMode');
+
+  if(zone === 'danger'){
+    dn.classList.add('danger');
+    zl.classList.add('danger');
+    zl.textContent = '⚠ DANGER — OBSTACLE VERY CLOSE';
+    sd.classList.add('alert');
+    bm.textContent = 'RAPID';
+    log('DANGER: Obstacle < 50cm!','danger');
+  } else if(zone === 'warn'){
+    dn.classList.add('warn');
+    zl.classList.add('warn');
+    zl.textContent = 'CAUTION — MODERATE DISTANCE';
+    bm.textContent = 'MEDIUM';
+    log('CAUTION: Obstacle 50-150cm','warn');
+  } else if(zone === 'safe'){
+    zl.textContent = 'CLEAR — OBSTACLE DETECTED FAR';
+    bm.textContent = 'SLOW';
+    log('CLEAR: Obstacle 150-400cm','safe');
+  } else {
+    zl.textContent = 'STANDBY — NO OBSTACLE';
+    bm.textContent = 'NONE';
+    sd.classList.remove('alert');
+  }
+
+  stopBeepLoop();
+  if(zone !== 'none') beepLoop(zone);
+}
+
+// ---- BLUETOOTH ----
+async function connectBluetooth(){
+  if(!navigator.bluetooth){
+    log('Web Bluetooth not supported. Use Chrome browser.','danger');
+    alert('Web Bluetooth API requires Chrome browser on Desktop or Android.');
+    return;
+  }
+  try{
+    log('Scanning for Bluetooth devices...','info');
+    document.getElementById('statusDot').className = 'status-dot scanning';
+    document.getElementById('statusText').textContent = 'SCANNING...';
+
+    const device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
+    });
+
+    log('Found: '+device.name,'info');
+    const server = await device.gatt.connect();
+    log('GATT connected','safe');
+
+    const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+    btChar = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+    await btChar.startNotifications();
+
+    btChar.addEventListener('characteristicvaluechanged', onBtData);
+
+    document.getElementById('statusDot').className = 'status-dot connected';
+    document.getElementById('statusText').textContent = 'CONNECTED';
+    document.getElementById('btStatus').textContent = device.name || 'ONLINE';
+    document.getElementById('btnConnect').textContent = 'Disconnect';
+    document.getElementById('btnConnect').onclick = disconnectBT;
+    log('Smart Glasses connected. Receiving data...','safe');
+
+    device.addEventListener('gattserverdisconnected', ()=>{
+      log('Bluetooth disconnected','danger');
+      resetUI();
+    });
+
+  } catch(e){
+    log('BT Error: '+e.message,'danger');
+    document.getElementById('statusDot').className = 'status-dot';
+    document.getElementById('statusText').textContent = 'DISCONNECTED';
+  }
+}
+
+function onBtData(event){
+  const val = new TextDecoder().decode(event.target.value).trim();
+  // parse: just a number like "45" or "D:45" or "dist:45"
+  const match = val.match(/(\d+(\.\d+)?)/);
+  if(match) updateDistance(parseFloat(match[1]));
+}
+
+function disconnectBT(){
+  if(btChar) btChar.service.device.gatt.disconnect();
+  resetUI();
+}
+
+function resetUI(){
+  document.getElementById('statusDot').className = 'status-dot';
+  document.getElementById('statusText').textContent = 'DISCONNECTED';
+  document.getElementById('btStatus').textContent = 'OFFLINE';
+  document.getElementById('btnConnect').textContent = 'Connect to Smart Glasses';
+  document.getElementById('btnConnect').onclick = connectBluetooth;
+  stopBeepLoop();
+  updateDistance(null);
+  currentZone = 'none';
+}
+
+// ---- DEMO MODE ----
+let demoDir = -1;
+let demoDist = 400;
+function startDemo(){
+  if(demoInterval){
+    clearInterval(demoInterval);
+    demoInterval = null;
+    document.querySelector('.btn-demo').textContent = 'Run Demo Mode';
+    stopBeepLoop();
+    updateDistance(null);
+    currentZone = 'none';
+    log('Demo stopped','info');
+    return;
+  }
+  document.querySelector('.btn-demo').textContent = 'Stop Demo';
+  document.getElementById('statusDot').className = 'status-dot connected';
+  document.getElementById('statusText').textContent = 'DEMO MODE';
+  document.getElementById('btStatus').textContent = 'SIMULATED';
+  log('Demo mode started — simulating approach','info');
+
+  demoDist = 400; demoDir = -1;
+  demoInterval = setInterval(()=>{
+    demoDist += demoDir * (5 + Math.random()*8);
+    if(demoDist <= 5){ demoDir = 1; demoDist = 5; }
+    if(demoDist >= 420){ demoDir = -1; demoDist = 420; }
+    updateDistance(Math.round(demoDist));
+  }, 300);
+}
+
+// ---- MUTE ----
+function toggleMute(){
+  muted = !muted;
+  document.getElementById('btnMute').textContent = muted ? 'Unmute Beeper' : 'Mute Beeper';
+  log(muted ? 'Audio muted' : 'Audio unmuted','info');
+}
+
+// ---- INIT LOG ----
+log('System initialized. Waiting for connection.','info');
+log('Use "Run Demo Mode" to test without hardware.','info');
+</script>
+</body>
+</html>
